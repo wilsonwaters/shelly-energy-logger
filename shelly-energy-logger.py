@@ -161,15 +161,3 @@ if __name__ == '__main__':
         scheduler.start()
     except KeyboardInterrupt:
         scheduler.shutdown()
-
-    # while True:
-    #     try:
-    #         response = requests.get(SHELLY_API_BASE_URL)
-    #         response.raise_for_status()
-    #         data = response.json()
-    #         with open(CSV_FILENAME, mode='a') as file:
-    #             writer = csv.writer(file)
-    #             writer.writerow([datetime.datetime.now(), data['energy']])
-    #     except requests.exceptions.RequestException as e:
-    #         print(f"Error: {e}")
-    #     time.sleep(60)
