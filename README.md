@@ -23,7 +23,8 @@ It is also possible to use the EnergyMonitor component (https://shelly-api-docs.
 
 # Installing
 - Ensure the device has latest firmware (tested with 1.4.0)
-- Install the requests library `pip install requests` (potentially in a virtual environment - `.\.venv\Scripts\activate `)
+- Install the requests libraries `pip install -r requirements.txt` (potentially in a virtual environment - `.\.venv\Scripts\activate `)
+- TODO: run as a service
 
 
 Requirements
