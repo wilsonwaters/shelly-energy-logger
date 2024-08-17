@@ -24,6 +24,7 @@ It is also possible to use the EnergyMonitor component (https://shelly-api-docs.
 # Installing
 - Ensure the device has latest firmware (tested with 1.4.0)
 - Install the requests libraries `pip install -r requirements.txt` (potentially in a virtual environment - `.\.venv\Scripts\activate `)
+- OR on linux `sudo apt install python3-responses python3-apscheduler`
 - TODO: run as a service
 
 
