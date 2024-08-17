@@ -10,7 +10,7 @@ import datetime
 import os
 
 
-SHELLY_API_BASE_URL = "http://pm1.alintech.com.au"
+SHELLY_API_BASE_URL = "http://<ENTER YOUR LOCAL DEVICE>"
 SHELLY_API_DEVICE_ID = "switch:0"
 CSV_FILENAME = "energy-consumption.csv"
 ENERGY_PRICE_PER_KWH = 0.315823
