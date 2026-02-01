@@ -18,8 +18,15 @@ import datetime
 import os
 
 
+# Device type configurations: maps device type to (device_id, energy_field)
+DEVICE_CONFIGS = {
+    "pm1-pro": ("switch:0", "aenergy.total"),
+    "em50": ("em1data:0", "total_act_energy"),
+    "em50:1": ("em1data:1", "total_act_energy"),  # Second channel of EM50
+}
+
 # Default values
-DEFAULT_DEVICE_ID = "switch:0"
+DEFAULT_DEVICE_TYPE = "pm1-pro"
 DEFAULT_CSV_FILENAME = "energy-consumption.csv"
 DEFAULT_ENERGY_PRICE = 0.315823
 DEFAULT_CRON_SCHEDULE = "0 * * * *"
@@ -31,9 +38,11 @@ def parse_args():
         description="Log energy consumption from Shelly Gen 2 devices to CSV files.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
+Supported device types: pm1-pro (default), em50, em50:1
+
 Environment Variables:
   SHELLY_API_BASE_URL      Base URL of the Shelly device (e.g., http://192.168.1.100)
-  SHELLY_API_DEVICE_ID     Device ID to query (default: switch:0)
+  SHELLY_DEVICE_TYPE       Device type (default: pm1-pro)
   CSV_FILENAME             Output CSV filename (default: energy-consumption.csv)
   ENERGY_PRICE_PER_KWH     Energy price per kWh for cost calculation (default: 0.315823)
   LOGGING_SCHEDULE_CRON    Cron schedule for logging (default: "0 * * * *")
@@ -63,11 +72,13 @@ Examples:
     )
 
     parser.add_argument(
-        "-d", "--device-id",
-        dest="device_id",
-        default=os.environ.get("SHELLY_API_DEVICE_ID", DEFAULT_DEVICE_ID),
-        help=f"Device ID to query (default: {DEFAULT_DEVICE_ID}). "
-             "Can also be set via SHELLY_API_DEVICE_ID environment variable."
+        "-d", "--device",
+        dest="device_type",
+        default=os.environ.get("SHELLY_DEVICE_TYPE", DEFAULT_DEVICE_TYPE),
+        choices=list(DEVICE_CONFIGS.keys()),
+        help=f"Device type (default: {DEFAULT_DEVICE_TYPE}). "
+             f"Supported: {', '.join(DEVICE_CONFIGS.keys())}. "
+             "Can also be set via SHELLY_DEVICE_TYPE environment variable."
     )
 
     parser.add_argument(
@@ -101,16 +112,32 @@ Examples:
     if not args.base_url:
         parser.error("--url is required (or set SHELLY_API_BASE_URL environment variable)")
 
+    # Set device_id and energy_field based on device type
+    args.device_id, args.energy_field = DEVICE_CONFIGS[args.device_type]
+
     return args
+
+def get_nested_value(data, path):
+    """Navigate nested dict using dot-separated path (e.g., 'aenergy.total')."""
+    keys = path.split('.')
+    value = data
+    for key in keys:
+        value = value[key]
+    return value
+
 
 def query_current_energy(config):
     try:
         response = requests.get(config.base_url + '/rpc/Shelly.GetStatus')
         response.raise_for_status()
         data = response.json()
-        return data[config.device_id]['aenergy']['total']
+        device_data = data[config.device_id]
+        return get_nested_value(device_data, config.energy_field)
     except requests.exceptions.RequestException as e:
         print(f"Error: {e}")
+        return None
+    except KeyError as e:
+        print(f"Error accessing energy data: {e}. Check --device option matches your Shelly device type.")
         return None
 
 def write_csv_header(config):
@@ -218,7 +245,7 @@ def main():
 
     print("Starting Shelly Energy Logger")
     print(f"  Device URL: {config.base_url}")
-    print(f"  Device ID: {config.device_id}")
+    print(f"  Device type: {config.device_type} (id: {config.device_id}, field: {config.energy_field})")
     print(f"  Output file: {config.csv_filename}")
     print(f"  Energy price: {config.energy_price} per kWh")
     print(f"  Schedule: {config.cron_schedule}")
