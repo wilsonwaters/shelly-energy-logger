@@ -335,7 +335,10 @@ def handle_new_reading(config, timestamp, current_cumulative_energy):
         write_csv_header(config)
 
     # calculate rate and cost of this period based on tariff config or flat rate
-    rate = get_tariff_rate(timestamp, config.tariff_config, config.energy_price)
+    # Use last_timestamp for rate lookup since the energy was consumed during the previous period
+    # (from last_timestamp to now). If no previous reading, use current timestamp (cost will be 0 anyway).
+    rate_timestamp = last_timestamp if last_timestamp else timestamp
+    rate = get_tariff_rate(rate_timestamp, config.tariff_config, config.energy_price)
     last_period_cost = last_period_energy * rate / 1000.0
 
     # write record
