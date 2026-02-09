@@ -1,0 +1,36 @@
+{
+  "name": "Synergy Electric Vehicle Add On",
+  "description": "Synergy EV Add On time-of-use tariff for WA residential customers with EVs. Prices as at 1 July 2025 (inc GST).",
+  "periods": [
+    {
+      "name": "overnight",
+      "start": "23:00",
+      "end": "06:00",
+      "rate": 0.193841
+    },
+    {
+      "name": "off_peak",
+      "start": "06:00",
+      "end": "09:00",
+      "rate": 0.236916
+    },
+    {
+      "name": "super_off_peak",
+      "start": "09:00",
+      "end": "15:00",
+      "rate": 0.086151
+    },
+    {
+      "name": "peak",
+      "start": "15:00",
+      "end": "21:00",
+      "rate": 0.538446
+    },
+    {
+      "name": "off_peak",
+      "start": "21:00",
+      "end": "23:00",
+      "rate": 0.236916
+    }
+  ]
+}
